@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        select, textarea, button {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text-to-Speech Generator</h1>
+    <form id="tts-form">
+        <label for="voice-select">Choose Voice:</label>
+        <select id="voice-select" name="voice">
+            <option value="en-AU|en-AU-Standard-B">en-AU (Standard-B)</option>
+            <option value="en-IN|en-IN-Standard-B">en-IN (Standard-B)</option>
+            <option value="en-GB|en-GB-Standard-B">en-GB (Standard-B)</option>
+        </select>
+        <br>
+        <label for="text-input">Enter Text:</label>
+        <textarea id="text-input" name="text" rows="4" cols="50" placeholder="Type your text here..."></textarea>
+        <br>
+        <button type="button" onclick="generateSpeech()">Generate Speech</button>
+    </form>
+    <audio id="audio-output" controls style="margin-top: 20px; display: none;"></audio>
+
+    <script>
+        async function generateSpeech() {
+            const voiceSelect = document.getElementById('voice-select').value.split('|');
+            const text = document.getElementById('text-input').value;
+            if (!text) {
+                alert('Please enter some text.');
+                return;
+            }
+
+            const [languageCode, voiceName] = voiceSelect;
+
+            const response = await fetch('/synthesize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, languageCode, voiceName })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const audioElement = document.getElementById('audio-output');
+                audioElement.src = URL.createObjectURL(blob);
+                audioElement.style.display = 'block';
+                audioElement.play();
+            } else {
+                alert('Error generating speech. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
